@@ -28,6 +28,8 @@
   .card .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
   .qrbox { display: grid; place-items: center; }
   .qrbox svg, .qrbox img { width: 100%; max-width: 380px; height: auto; display: block; border-radius: 10px; }
+  /* The QR is transparent: a light checkerboard shows that, and keeps it readable on the dark theme. */
+  .qrbox svg { background: repeating-conic-gradient(#e6e9eb 0 25%, #fff 0 50%) 0 0 / 16px 16px; }
   .variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-bottom: 32px; }
   .variants .card h3 { margin: 10px 0 2px; font-size: 15px; }
   .variants .card p { margin: 0; font-size: 13px; color: var(--muted); }
@@ -114,7 +116,7 @@
       <li><b>Dots style:</b> every dark module is drawn as its own round dot (92% of the cell), the corner eyes are rounded squares, and there is no texture.</li>
       <li><b>Rings style:</b> smaller dots (72% of the cell) leave more open space. The corner eyes are bullseyes, a thick ring around a solid circle. There's no texture.</li>
       <li><b>Alignment patterns:</b> required by the QR standard from version 2 up; they let scanners correct tilt and curvature. Drawn as a small ring and dot that match the eyes. Any that would sit under the logo is left out.</li>
-      <li><b>Backdrop:</b> plain white fills the whole image in every theme, with an empty quiet zone of 4 modules. Nothing is drawn outside the code area.</li>
+      <li><b>Backdrop:</b> transparent in every proposal style, including the empty 4-module quiet zone, so the QR takes on whatever it is placed on. Scanners need dark shapes on a light background, so place it on a light surface. Nothing is drawn outside the code area.</li>
       <li><b>Logo:</b> the AssanPay mark (the same path as <code>ReceiptLogoPath</code>) fills 92% of a rounded-square clearing in the centre. The clearing's corners are as round as the eyes' outer corners (2.3 of 7 modules). Nothing is drawn behind the logo: the clearing is just the code's squares left out wherever their centre falls inside it, and shapes that reach it end in a round cap, like everywhere else in the code. Error correction goes up to H (30% recovery), and only about 7% of the code is cleared. A code too small to fit the logo clear of the format information is drawn without it.</li>
       <li><b>Server:</b> production (<code>QrGeneratorService</code>) draws the fluid design with SkiaSharp at about 1 kpx as an opaque PNG. It still clears the logo with a white rounded square, so its clearing corners are trimmed along the arc rather than formed by whole rounded squares as here.</li>
     </ul>

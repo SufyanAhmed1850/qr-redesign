@@ -92,8 +92,7 @@ window.AssanQR = (() => {
     }
     const isAlign = (r, c) => alignCells.some(([ar, ac]) => Math.abs(r - ar) <= 2 && Math.abs(c - ac) <= 2);
 
-    // White backdrop across the whole image, for every theme.
-    parts.push(`<rect width="${size}" height="${size}" fill="#ffffff"/>`);
+    // No backdrop: the image is transparent, so the QR takes on whatever it is placed on.
 
     // Faint light-module texture (AssanPay theme style only)
     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {

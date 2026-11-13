@@ -30,6 +30,8 @@
   .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
   .qrbox { display: grid; place-items: center; }
   .qrbox svg { width: 100%; max-width: 520px; height: auto; display: block; border-radius: 10px; }
+  /* The QR is transparent: a light checkerboard shows that, and keeps it readable on the dark theme. */
+  .qrbox svg { background: repeating-conic-gradient(#e6e9eb 0 25%, #fff 0 50%) 0 0 / 16px 16px; }
   .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .framed .row { display: none; } /* downloads are blocked inside sandboxed frames */
   button { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); cursor: pointer; }
@@ -72,7 +74,7 @@
           <span style="background:#251200"></span><div>Eye and alignment rings <code>#251200</code></div>
           <span style="background:#b8651e"></span><div>Eye centres <code>#B8651E</code></div>
           <span style="background:#e09145"></span><div>Logo <code>#E09145</code></div>
-          <span style="background:#ffffff"></span><div>Background <code>#FFFFFF</code></div>
+          <span style="background:repeating-conic-gradient(#d0d4d6 0 25%,#fff 0 50%) 0 0/8px 8px"></span><div>Background <code>transparent</code></div>
         </div>
       </div>
       <div class="card">
@@ -94,7 +96,7 @@
       <li><b>Alignment patterns:</b> a small rounded ring and dot that match the eyes. Any that would sit under the logo is left out.</li>
       <li><b>Logo:</b> the AssanPay mark fills 92% of a rounded-square clearing as round as the eyes' outer corners. Nothing is drawn behind it: squares whose centre falls inside the clearing are left out, and shapes that reach it end in a round cap, like everywhere else in the code.</li>
       <li><b>Error correction:</b> H (30% recovery). The logo clears about 7% of the code. A code too small to fit the logo clear of the format information is drawn without it.</li>
-      <li><b>Quiet zone:</b> 4 modules of plain white on every side.</li>
+      <li><b>Background:</b> transparent, including the 4-module quiet zone on every side. Place it on a light surface: scanners need dark shapes on a light background.</li>
     </ul>
   </div>
 </main>
