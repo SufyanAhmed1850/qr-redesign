@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssanPay Fluid QR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="../qr.js"></script>
+<style>
+  :root { --page: #f4f7f8; --card: #ffffff; --ink: #1c2b31; --muted: #5d7079; --line: #eadfd1; --accent: #b8651e; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page: #12191c; --card: #1a2327; --ink: #e6eef0; --muted: #94a7ae; --line: #2a373c; --accent: #e09145; }
+  }
+  :root[data-theme="dark"] { --page: #12191c; --card: #1a2327; --ink: #e6eef0; --muted: #94a7ae; --line: #2a373c; --accent: #e09145; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  a { color: var(--accent); }
+  .back { font-size: 14px; text-decoration: none; }
+  h1 { font-size: 26px; margin: 12px 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; max-width: 70ch; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 24px; }
+  .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+  .controls input[type=text] { width: min(420px, 80vw); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); font: inherit; }
+  .controls .check { flex-direction: row; align-items: center; gap: 8px; color: var(--ink); }
+  .grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; margin-bottom: 32px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .qrbox { display: grid; place-items: center; }
+  .qrbox svg { width: 100%; max-width: 520px; height: auto; display: block; border-radius: 10px; }
+  .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .framed .row { display: none; } /* downloads are blocked inside sandboxed frames */
+  button { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  .swatches { display: grid; grid-template-columns: 22px 1fr; gap: 8px 10px; align-items: center; font-size: 13px; color: var(--muted); margin: 0; }
+  .swatches span { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); }
+  .swatches code { color: var(--ink); }
+  ul.spec { margin: 0; padding-left: 18px; color: var(--muted); }
+  ul.spec li { margin: 4px 0; }
+  ul.spec b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../">← All proposals</a>
+  <h1>AssanPay Fluid QR</h1>
+  <p class="lead">The approved design. Type any payload to see it rendered, then scan it with a phone camera.</p>
+
+  <div class="controls">
+    <label>QR payload
+      <input type="text" id="payload" value="https://pay.example.com/p/INV-2026-10-0042">
+    </label>
+    <label class="check"><input type="checkbox" id="logo" checked> AssanPay logo in centre (switches error correction to H)</label>
+  </div>
+
+  <section class="grid">
+    <div class="card">
+      <span class="tag">✓ Approved · AssanPay fluid</span>
+      <div class="qrbox" id="qr-fluid"></div>
+      <div class="row">
+        <button data-dl="assanFluid" data-fmt="png">Download PNG</button>
+        <button data-dl="assanFluid" data-fmt="svg">Download SVG</button>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:24px">
+        <h2>Colours</h2>
+        <div class="swatches">
+          <span style="background:#5a3818"></span><div>Code shapes <code>#5A3818</code></div>
+          <span style="background:#251200"></span><div>Eye and alignment rings <code>#251200</code></div>
+          <span style="background:#b8651e"></span><div>Eye centres <code>#B8651E</code></div>
+          <span style="background:#e09145"></span><div>Logo <code>#E09145</code></div>
+          <span style="background:#ffffff"></span><div>Background <code>#FFFFFF</code></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag">Black &amp; white</span>
+        <div class="qrbox" id="qr-mono"></div>
+        <div class="row">
+          <button data-dl="fluidMono" data-fmt="png">PNG</button>
+          <button data-dl="fluidMono" data-fmt="svg">SVG</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2>Design spec</h2>
+  <div class="card">
+    <ul class="spec">
+      <li><b>Shapes:</b> neighbouring modules merge into single shapes. Outer corners are fully rounded where both sides are open, and inside corners get a small curve.</li>
+      <li><b>Eyes:</b> a 7-module rounded ring with a 3-module rounded centre. The light ring between them stays empty, so scanners still see the 1:1:3:1:1 ratio.</li>
+      <li><b>Alignment patterns:</b> a small rounded ring and dot that match the eyes. Any that would sit under the logo is left out.</li>
+      <li><b>Logo:</b> the AssanPay mark fills 92% of a rounded-square clearing as round as the eyes' outer corners. Nothing is drawn behind it: squares whose centre falls inside the clearing are left out, and squares at its corners round off to follow the curve.</li>
+      <li><b>Error correction:</b> H (30% recovery). The logo clears about 7% of the code. A code too small to fit the logo clear of the format information is drawn without it.</li>
+      <li><b>Quiet zone:</b> 4 modules of plain white on every side.</li>
+    </ul>
+  </div>
+</main>
+
+<script>
+(() => {
+  try { if (window.self !== window.top) document.body.classList.add("framed"); } catch { document.body.classList.add("framed"); }
+  const { THEMES, render } = AssanQR;
+  const $ = id => document.getElementById(id);
+  const svgs = {};
+
+  function draw() {
+    const text = $("payload").value.trim() || " ";
+    const logo = $("logo").checked;
+    try {
+      svgs.assanFluid = render(text, THEMES.assanpay, { logo, style: "fluid" });
+      svgs.fluidMono = render(text, THEMES.fluidMono, { logo, style: "fluid" });
+      $("qr-fluid").innerHTML = svgs.assanFluid;
+      $("qr-mono").innerHTML = svgs.fluidMono;
+    } catch (e) {
+      console.error("QR render failed", e);
+      $("qr-fluid").textContent = "Payload too long for this demo: " + e;
+    }
+  }
+
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-dl]");
+    if (b) AssanQR.download(svgs[b.dataset.dl], `qr-${b.dataset.dl}.${b.dataset.fmt}`);
+  });
+  $("payload").addEventListener("input", draw);
+  $("logo").addEventListener("change", draw);
+  draw();
+})();
+</script>
+</body>
+</html>
