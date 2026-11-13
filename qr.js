@@ -49,6 +49,7 @@ window.AssanQR = (() => {
   }
 
   function render(text, theme, opts = {}) {
+    // Optional overrides (fluid page customizer); each defaults to the approved design.
     const logo = !!opts.logo;
     // "dots": every dark module is its own round dot, with rounded-square eyes and no texture.
     const dots = opts.style === "dots";
@@ -70,9 +71,9 @@ window.AssanQR = (() => {
     // A rounded square whose corner radius matches the eyes' outer corner (2.3 of 7). It stays clear of the
     // format info next to the eyes; a code too small for that gets no logo.
     const mid = (n - 1) / 2;
-    const lr = Math.min(Math.round(n * 0.13), mid - 9);
+    const lr = Math.min(Math.round(n * (opts.logoShare ?? 0.13)), mid - 9);
     const hasLogo = logo && lr >= 3;
-    const half = lr + 0.5, corner = 2 * half * (2.3 / 7), innerEdge = half - corner;
+    const half = lr + 0.5, corner = 2 * half * (opts.logoCorner ?? 2.3 / 7), innerEdge = half - corner;
     // Module cleared when its centre is inside the rounded square. Nothing is drawn behind the logo (no white shape,
     // no clip): the clearing is just the absence of modules, so the logo sits on the QR's own background.
     const inLogo = (r, c) => {
@@ -92,7 +93,8 @@ window.AssanQR = (() => {
     }
     const isAlign = (r, c) => alignCells.some(([ar, ac]) => Math.abs(r - ar) <= 2 && Math.abs(c - ac) <= 2);
 
-    // No backdrop: the image is transparent, so the QR takes on whatever it is placed on.
+    // Transparent unless a background colour is given, so the QR takes on whatever it is placed on.
+    if (opts.background) parts.push(`<rect width="${size}" height="${size}" fill="${opts.background}"/>`);
 
     // Faint light-module texture (AssanPay theme style only)
     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
@@ -109,7 +111,7 @@ window.AssanQR = (() => {
     const g = S * 0.15, w = S - 2 * g;
     if (fluid) {
       const D = (r, c) => r >= 0 && c >= 0 && r < n && c < n && m[r][c] && !isFinder(r, c) && !isAlign(r, c) && !inLogo(r, c);
-      const R = S * 0.5, F = S * 0.3;
+      const R = S * (opts.corner ?? 0.5), F = S * (opts.fillet ?? 0.3);
       let d = "";
       for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
         const x = off + c * S, y = off + r * S;
@@ -193,7 +195,7 @@ window.AssanQR = (() => {
     // Logo: the AssanPay mark at 92% of the clearing, with nothing behind it.
     if (hasLogo) {
       const cx = off + (mid + 0.5) * S, cy = cx, H = half * S;
-      const L = 2 * H * 0.92;
+      const L = 2 * H * (opts.logoFill ?? 0.92);
       parts.push(`<svg x="${(cx - L / 2).toFixed(2)}" y="${(cy - L / 2).toFixed(2)}" width="${L.toFixed(2)}" height="${L.toFixed(2)}" viewBox="0 0 375 375"><path fill="${theme.logo}" fill-rule="evenodd" d="${LOGO_PATH}"/></svg>`);
     }
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="QR code">${parts.join("")}</svg>`;

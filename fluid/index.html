@@ -7,38 +7,73 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="../qr.js"></script>
 <style>
-  :root { --page: #f4f7f8; --card: #ffffff; --ink: #1c2b31; --muted: #5d7079; --line: #eadfd1; --accent: #b8651e; }
+  :root { --page: #f4f7f8; --card: #ffffff; --ink: #1c2b31; --muted: #5d7079; --line: #eadfd1; --accent: #b8651e; --warn-bg: #fff4e5; --warn-ink: #8a4a12; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --page: #12191c; --card: #1a2327; --ink: #e6eef0; --muted: #94a7ae; --line: #2a373c; --accent: #e09145; }
+    :root:not([data-theme="light"]) { --page: #12191c; --card: #1a2327; --ink: #e6eef0; --muted: #94a7ae; --line: #2a373c; --accent: #e09145; --warn-bg: #3a2a17; --warn-ink: #fec185; }
   }
-  :root[data-theme="dark"] { --page: #12191c; --card: #1a2327; --ink: #e6eef0; --muted: #94a7ae; --line: #2a373c; --accent: #e09145; }
+  :root[data-theme="dark"] { --page: #12191c; --card: #1a2327; --ink: #e6eef0; --muted: #94a7ae; --line: #2a373c; --accent: #e09145; --warn-bg: #3a2a17; --warn-ink: #fec185; }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  main { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
   a { color: var(--accent); }
-  .back { font-size: 14px; text-decoration: none; }
-  h1 { font-size: 26px; margin: 12px 0 4px; letter-spacing: -0.01em; }
+  .back { font-size: 14px; text-decoration: none; display: inline-block; padding: 11px 0; }
+  h1 { font-size: 26px; margin: 4px 0 4px; letter-spacing: -0.01em; }
   h2 { font-size: 17px; margin: 0 0 12px; }
   p.lead { color: var(--muted); margin: 0 0 24px; max-width: 70ch; }
-  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 24px; }
-  .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
-  .controls input[type=text] { width: min(420px, 80vw); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); font: inherit; }
-  .controls .check { flex-direction: row; align-items: center; gap: 8px; color: var(--ink); }
-  .grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; margin-bottom: 32px; }
-  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .payload { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 24px; }
+  .payload input { width: 100%; max-width: 560px; min-height: 44px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); font: inherit; }
+
+  /* Desktop: QR and black & white on the left, the panel beside them. The 1fr row takes the panel's extra height. */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto 1fr; grid-template-areas: "qr panel" "mono panel"; gap: 24px; align-items: start; margin-bottom: 32px; }
+  .qrcard { grid-area: qr; } .mono { grid-area: mono; } .panel { grid-area: panel; }
+  /* Narrow: the panel follows the main QR, and that QR stays pinned (smaller) so changes are visible while adjusting. */
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: "qr" "panel" "mono"; }
+    .qrcard { position: sticky; top: 0; z-index: 2; box-shadow: 0 6px 16px rgb(0 0 0 / .12); padding: 12px; }
+    .qrcard .qrbox svg { max-width: min(220px, 34vh); }
+    .qrcard .tag { margin-bottom: 4px; }
+    .qrcard .row { margin-top: 8px; justify-content: center; }
+  }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
   .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
   .qrbox { display: grid; place-items: center; }
   .qrbox svg { width: 100%; max-width: 520px; height: auto; display: block; border-radius: 10px; }
-  /* The QR is transparent: a light checkerboard shows that, and keeps it readable on the dark theme. */
+  /* Transparent QR: a light checkerboard shows that, and keeps it readable on the dark theme. */
   .qrbox svg { background: repeating-conic-gradient(#e6e9eb 0 25%, #fff 0 50%) 0 0 / 16px 16px; }
+  .mono .qrbox svg { max-width: 260px; }
   .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-  .framed .row { display: none; } /* downloads are blocked inside sandboxed frames */
-  button { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); cursor: pointer; }
+  .framed .row.dl { display: none; } /* downloads are blocked inside sandboxed frames */
+  button { font: inherit; font-size: 14px; min-height: 44px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); cursor: pointer; }
   button:hover { border-color: var(--accent); }
-  .swatches { display: grid; grid-template-columns: 22px 1fr; gap: 8px 10px; align-items: center; font-size: 13px; color: var(--muted); margin: 0; }
-  .swatches span { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); }
-  .swatches code { color: var(--ink); }
+
+  /* Customize panel */
+  .panel { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; padding: 0; }
+  @media (max-width: 860px) { .panel { position: static; max-height: none; } }
+  .panel header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px 8px; }
+  .panel header h2 { margin: 0; }
+  .panel .saved { font-size: 12px; color: var(--muted); }
+  .panel fieldset { border: 0; border-top: 1px solid var(--line); margin: 0; padding: 14px 18px 16px; display: grid; gap: 12px; }
+  .panel legend { float: left; width: 100%; padding: 0; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .panel legend + * { clear: both; }
+  .field { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; font-size: 14px; }
+  .field .hint { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+  .colour { display: flex; align-items: center; gap: 8px; }
+  .colour input[type=color] { width: 44px; height: 44px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--page); cursor: pointer; }
+  .colour input[type=text] { width: 92px; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--page); color: var(--ink); font: 13px ui-monospace, Consolas, monospace; text-transform: uppercase; }
+  .colour input[type=text][aria-invalid=true] { border-color: #c0392b; }
+  .colour input:disabled { opacity: .45; cursor: not-allowed; }
+  .slider { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 52px; align-items: center; gap: 12px; }
+  .slider input { width: 100%; min-height: 32px; accent-color: var(--accent); }
+  .slider output { font: 13px ui-monospace, Consolas, monospace; text-align: right; color: var(--ink); }
+  .check { display: flex; align-items: center; gap: 10px; font-size: 14px; min-height: 32px; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .warn { margin: 0 18px 12px; padding: 10px 12px; border-radius: 8px; background: var(--warn-bg); color: var(--warn-ink); font-size: 13px; }
+  .warn[hidden] { display: none; }
+  .panel footer { border-top: 1px solid var(--line); padding: 14px 18px 18px; }
+  .panel footer button { width: 100%; }
+
   ul.spec { margin: 0; padding-left: 18px; color: var(--muted); }
   ul.spec li { margin: 4px 0; }
   ul.spec b { color: var(--ink); font-weight: 600; }
@@ -48,44 +83,70 @@
 <main>
   <a class="back" href="../">← All proposals</a>
   <h1>AssanPay Fluid QR</h1>
-  <p class="lead">The approved design. Type any payload to see it rendered, then scan it with a phone camera.</p>
+  <p class="lead">The approved design. Type any payload, adjust the design in the panel, then scan the result with a phone camera. Your settings are saved in this browser.</p>
 
-  <div class="controls">
-    <label>QR payload
-      <input type="text" id="payload" value="https://pay.example.com/p/INV-2026-10-0042">
-    </label>
-    <label class="check"><input type="checkbox" id="logo" checked> AssanPay logo in centre (switches error correction to H)</label>
-  </div>
+  <label class="payload">QR payload
+    <input type="text" id="payload" value="https://pay.example.com/p/INV-2026-10-0042" spellcheck="false" autocomplete="off">
+  </label>
 
-  <section class="grid">
-    <div class="card">
+  <section class="layout">
+    <div class="card qrcard">
       <span class="tag">✓ Approved · AssanPay fluid</span>
       <div class="qrbox" id="qr-fluid"></div>
-      <div class="row">
+      <div class="row dl">
         <button data-dl="assanFluid" data-fmt="png">Download PNG</button>
         <button data-dl="assanFluid" data-fmt="svg">Download SVG</button>
       </div>
     </div>
-    <div>
-      <div class="card" style="margin-bottom:24px">
-        <h2>Colours</h2>
-        <div class="swatches">
-          <span style="background:#5a3818"></span><div>Code shapes <code>#5A3818</code></div>
-          <span style="background:#251200"></span><div>Eye and alignment rings <code>#251200</code></div>
-          <span style="background:#b8651e"></span><div>Eye centres <code>#B8651E</code></div>
-          <span style="background:#e09145"></span><div>Logo <code>#E09145</code></div>
-          <span style="background:repeating-conic-gradient(#d0d4d6 0 25%,#fff 0 50%) 0 0/8px 8px"></span><div>Background <code>transparent</code></div>
-        </div>
-      </div>
-      <div class="card">
-        <span class="tag">Black &amp; white</span>
-        <div class="qrbox" id="qr-mono"></div>
-        <div class="row">
-          <button data-dl="fluidMono" data-fmt="png">PNG</button>
-          <button data-dl="fluidMono" data-fmt="svg">SVG</button>
-        </div>
+    <div class="card mono">
+      <span class="tag">Black &amp; white</span>
+      <div class="qrbox" id="qr-mono"></div>
+      <div class="row dl">
+        <button data-dl="fluidMono" data-fmt="png">Download PNG</button>
+        <button data-dl="fluidMono" data-fmt="svg">Download SVG</button>
       </div>
     </div>
+
+    <form class="card panel" id="panel" aria-labelledby="panel-title" novalidate>
+      <header>
+        <h2 id="panel-title">Customize</h2>
+        <span class="saved" id="saved" aria-live="polite"></span>
+      </header>
+      <p class="warn" id="warn" role="status" hidden></p>
+
+      <fieldset>
+        <legend>Colours</legend>
+        <div class="field"><span id="l-ink">Code shapes</span><span class="colour" data-key="ink"></span></div>
+        <div class="field"><span id="l-eye">Eye and alignment rings</span><span class="colour" data-key="eye"></span></div>
+        <div class="field"><span id="l-eyeCore">Eye centres</span><span class="colour" data-key="eyeCore"></span></div>
+        <div class="field"><span id="l-logo">Logo</span><span class="colour" data-key="logo"></span></div>
+        <label class="check"><input type="checkbox" name="transparent"> Transparent background</label>
+        <div class="field"><span id="l-background">Background</span><span class="colour" data-key="background"></span>
+          <span class="hint">Used when the background isn't transparent.</span></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Shape</legend>
+        <div class="field"><label for="corner">Corner rounding</label>
+          <span class="slider"><input type="range" id="corner" name="corner" min="0" max="0.5" step="0.05"><output for="corner"></output></span></div>
+        <div class="field"><label for="fillet">Inside-corner curve</label>
+          <span class="slider"><input type="range" id="fillet" name="fillet" min="0" max="0.5" step="0.05"><output for="fillet"></output></span></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Logo</legend>
+        <label class="check"><input type="checkbox" name="showLogo"> Show logo (switches error correction to H)</label>
+        <div class="field"><label for="logoShare">Clearing size</label>
+          <span class="slider"><input type="range" id="logoShare" name="logoShare" min="0.08" max="0.16" step="0.01"><output for="logoShare"></output></span>
+          <span class="hint">Bigger clearings hide more of the code. Above ~14% some phones may stop scanning.</span></div>
+        <div class="field"><label for="logoCorner">Clearing roundness</label>
+          <span class="slider"><input type="range" id="logoCorner" name="logoCorner" min="0" max="0.5" step="0.01"><output for="logoCorner"></output></span></div>
+        <div class="field"><label for="logoFill">Logo size in clearing</label>
+          <span class="slider"><input type="range" id="logoFill" name="logoFill" min="0.6" max="1" step="0.02"><output for="logoFill"></output></span></div>
+      </fieldset>
+
+      <footer><button type="button" id="reset">Reset to defaults</button></footer>
+    </form>
   </section>
 
   <h2>Design spec</h2>
@@ -106,28 +167,125 @@
   try { if (window.self !== window.top) document.body.classList.add("framed"); } catch { document.body.classList.add("framed"); }
   const { THEMES, render } = AssanQR;
   const $ = id => document.getElementById(id);
-  const svgs = {};
+  const form = $("panel");
+  const STORE = "assanqr.fluid.config.v1";
+  const HEX = /^#[0-9a-f]{6}$/i;
 
+  // The approved design. Reset returns here; saved settings are layered on top.
+  const DEFAULTS = Object.freeze({
+    ink: "#5a3818", eye: "#251200", eyeCore: "#b8651e", logo: "#e09145", background: "#ffffff", transparent: true,
+    corner: 0.5, fillet: 0.3, showLogo: true, logoShare: 0.13, logoCorner: 2.3 / 7, logoFill: 0.92,
+  });
+  const COLOURS = ["ink", "eye", "eyeCore", "logo", "background"];
+  const RANGES = { corner: [0, 0.5], fillet: [0, 0.5], logoShare: [0.08, 0.16], logoCorner: [0, 0.5], logoFill: [0.6, 1] };
+
+  // Saved settings come from storage the viewer controls: keep only known keys with valid values.
+  function load() {
+    const cfg = { ...DEFAULTS };
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE) || "{}");
+      for (const k of COLOURS) if (HEX.test(saved[k])) cfg[k] = saved[k].toLowerCase();
+      for (const [k, [lo, hi]] of Object.entries(RANGES)) if (typeof saved[k] === "number" && saved[k] >= lo && saved[k] <= hi) cfg[k] = saved[k];
+      for (const k of ["transparent", "showLogo"]) if (typeof saved[k] === "boolean") cfg[k] = saved[k];
+    } catch { /* no storage or bad JSON: use defaults */ }
+    return cfg;
+  }
+  function save(cfg) {
+    const changed = Object.keys(DEFAULTS).some(k => cfg[k] !== DEFAULTS[k]);
+    try {
+      if (changed) localStorage.setItem(STORE, JSON.stringify(cfg)); else localStorage.removeItem(STORE);
+      $("saved").textContent = changed ? "Saved in this browser" : "Defaults";
+    } catch { $("saved").textContent = "Can't save in this browser"; }
+  }
+
+  // Build each colour control: a picker plus a hex field, kept in sync.
+  for (const span of form.querySelectorAll(".colour")) {
+    const key = span.dataset.key, label = `l-${key}`;
+    span.innerHTML = `<input type="color" name="${key}" aria-labelledby="${label}"><input type="text" name="${key}Hex" maxlength="7" spellcheck="false" autocomplete="off" aria-labelledby="${label}">`;
+  }
+
+  let cfg = load();
+
+  function fill() {
+    for (const k of COLOURS) { form[k].value = cfg[k]; form[k + "Hex"].value = cfg[k]; form[k + "Hex"].removeAttribute("aria-invalid"); }
+    for (const k of Object.keys(RANGES)) form[k].value = cfg[k];
+    form.transparent.checked = cfg.transparent;
+    form.showLogo.checked = cfg.showLogo;
+    sync();
+  }
+
+  // Slider readouts and controls that only apply in some states.
+  function sync() {
+    const pct = v => Math.round(v * 100) + "%";
+    form.querySelector('output[for=corner]').value = pct(cfg.corner * 2);
+    form.querySelector('output[for=fillet]').value = pct(cfg.fillet * 2);
+    form.querySelector('output[for=logoShare]').value = pct(cfg.logoShare);
+    form.querySelector('output[for=logoCorner]').value = pct(cfg.logoCorner * 2);
+    form.querySelector('output[for=logoFill]').value = pct(cfg.logoFill);
+    form.background.disabled = form.backgroundHex.disabled = cfg.transparent;
+    for (const k of ["logoShare", "logoCorner", "logoFill", "logo", "logoHex"]) form[k].disabled = !cfg.showLogo;
+  }
+
+  // WCAG contrast ratio between two #rrggbb colours.
+  function contrast(a, b) {
+    const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+    return (x + 0.05) / (y + 0.05);
+  }
+
+  const svgs = {};
   function draw() {
     const text = $("payload").value.trim() || " ";
-    const logo = $("logo").checked;
+    const shape = { logo: cfg.showLogo, style: "fluid", corner: cfg.corner, fillet: cfg.fillet, logoShare: cfg.logoShare, logoCorner: cfg.logoCorner, logoFill: cfg.logoFill };
+    const theme = { ...THEMES.assanpay, ink1: cfg.ink, eye: cfg.eye, eyeCore: cfg.eyeCore, logo: cfg.logo };
+    const bg = cfg.transparent ? null : cfg.background;
     try {
-      svgs.assanFluid = render(text, THEMES.assanpay, { logo, style: "fluid" });
-      svgs.fluidMono = render(text, THEMES.fluidMono, { logo, style: "fluid" });
+      svgs.assanFluid = render(text, theme, { ...shape, background: bg });
+      svgs.fluidMono = render(text, THEMES.fluidMono, { ...shape, background: bg && "#ffffff" });
       $("qr-fluid").innerHTML = svgs.assanFluid;
       $("qr-mono").innerHTML = svgs.fluidMono;
     } catch (e) {
       console.error("QR render failed", e);
       $("qr-fluid").textContent = "Payload too long for this demo: " + e;
     }
+    // Scanners need dark shapes on a light background; warn before the user ships one that won't scan.
+    const against = cfg.transparent ? "#ffffff" : cfg.background;
+    const worst = Math.min(...["ink", "eye", "eyeCore"].map(k => contrast(cfg[k], against)));
+    const lightOnDark = !cfg.transparent && contrast(cfg.background, "#000000") < contrast(cfg.ink, "#000000");
+    const warn = $("warn");
+    warn.hidden = worst >= 3 && !lightOnDark;
+    warn.textContent = lightOnDark
+      ? "The code is lighter than its background. Many scanners can't read inverted QR codes."
+      : `Low contrast (${worst.toFixed(1)}:1${cfg.transparent ? " against white" : ""}). Aim for at least 3:1 so phones can scan it.`;
   }
+
+  function update() { sync(); save(cfg); draw(); }
+
+  form.addEventListener("input", e => {
+    const t = e.target, name = t.name;
+    if (COLOURS.includes(name)) { cfg[name] = t.value.toLowerCase(); form[name + "Hex"].value = cfg[name]; form[name + "Hex"].removeAttribute("aria-invalid"); }
+    else if (name.endsWith("Hex")) {
+      const key = name.slice(0, -3), v = t.value.startsWith("#") ? t.value : "#" + t.value;
+      if (!HEX.test(v)) { t.setAttribute("aria-invalid", "true"); return; }
+      t.removeAttribute("aria-invalid"); cfg[key] = v.toLowerCase(); form[key].value = cfg[key];
+    }
+    else if (name in RANGES) cfg[name] = +t.value;
+    else if (name === "transparent") cfg.transparent = t.checked;
+    else if (name === "showLogo") cfg.showLogo = t.checked;
+    update();
+  });
+  // A half-typed hex goes back to the last valid colour when the field loses focus.
+  form.addEventListener("focusout", e => { const t = e.target; if (t.name?.endsWith("Hex") && t.getAttribute("aria-invalid")) { t.value = cfg[t.name.slice(0, -3)]; t.removeAttribute("aria-invalid"); } });
+  form.addEventListener("submit", e => e.preventDefault());
+  $("reset").addEventListener("click", () => { cfg = { ...DEFAULTS }; fill(); update(); });
 
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-dl]");
     if (b) AssanQR.download(svgs[b.dataset.dl], `qr-${b.dataset.dl}.${b.dataset.fmt}`);
   });
   $("payload").addEventListener("input", draw);
-  $("logo").addEventListener("change", draw);
+  fill();
+  save(cfg);
   draw();
 })();
 </script>
