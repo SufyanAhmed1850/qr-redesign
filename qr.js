@@ -82,7 +82,6 @@ window.AssanQR = (() => {
       const ex = Math.max(0, dr - innerEdge), ey = Math.max(0, dc - innerEdge);
       return ex * ex + ey * ey < corner * corner;
     };
-    const inLogoCorner = (r, c) => Math.abs(r - mid) + 0.5 > innerEdge && Math.abs(c - mid) + 0.5 > innerEdge;
 
     const alignCells = [], align = [];
     const ap = ALIGN[version] || [];
@@ -117,11 +116,9 @@ window.AssanQR = (() => {
         const x = off + c * S, y = off + r * S;
         if (D(r, c)) {
           used[r][c] = true;
-          // A corner is rounded only when both sides touching it are open. Straight sides of the logo clearing count
-          // as closed (modules keep a flat edge there); its rounded corners count as open, so modules there round off
-          // and follow the curve.
-          const DL = (rr, cc) => D(rr, cc) || (inLogo(rr, cc) && !inLogoCorner(rr, cc));
-          const up = DL(r - 1, c), dn = DL(r + 1, c), lf = DL(r, c - 1), rt = DL(r, c + 1);
+          // A corner is rounded only when both sides touching it are open. The logo clearing counts as open too, so
+          // shapes that reach it end in a round cap instead of a flat, sliced-looking edge.
+          const up = D(r - 1, c), dn = D(r + 1, c), lf = D(r, c - 1), rt = D(r, c + 1);
           const tl = !up && !lf ? R : 0, tr = !up && !rt ? R : 0, br = !dn && !rt ? R : 0, bl = !dn && !lf ? R : 0;
           d += `M${x + tl} ${y}H${x + S - tr}A${tr} ${tr} 0 0 1 ${x + S} ${y + tr}V${y + S - br}A${br} ${br} 0 0 1 ${x + S - br} ${y + S}H${x + bl}A${bl} ${bl} 0 0 1 ${x} ${y + S - bl}V${y + tl}A${tl} ${tl} 0 0 1 ${x + tl} ${y}Z`;
         } else if (!isFinder(r, c) && !isAlign(r, c) && !inLogo(r, c)) {
